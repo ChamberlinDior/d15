@@ -25,9 +25,18 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
+                        // Clients
                         .requestMatchers("/api/clients/register").permitAll()
-                        .requestMatchers("/api/clients/login").permitAll() //
+                        .requestMatchers("/api/clients/login").permitAll()
+
+                        // Livreurs
+                        .requestMatchers("/api/livreurs/register").permitAll()
+                        .requestMatchers("/api/livreurs/login").permitAll()
+
+                        // Colis (protégé, ex. accès seulement après authentification)
                         .requestMatchers("/api/colis/**").authenticated()
+
+                        // Le reste requiert une authentification
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

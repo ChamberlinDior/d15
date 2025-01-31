@@ -83,7 +83,7 @@ databaseChangeLog:
                   type: DOUBLE
               - column:
                   name: assurance
-                  type: TINYINT(1)  # Utilisation de TINYINT(1) pour correspondre à BOOLEAN en Hibernate
+                  type: TINYINT(1)
               - column:
                   name: client_id
                   type: BIGINT
@@ -185,3 +185,68 @@ databaseChangeLog:
             tableName: colis
             columnName: assurance
             newDataType: BIT
+
+  # NOUVEAU CHANGESET POUR LES LIVREURS
+  - changeSet:
+      id: 4
+      author: "admin"
+      changes:
+        - createTable:
+            tableName: livreurs
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+
+              - column:
+                  name: nom
+                  type: VARCHAR(100)
+
+              - column:
+                  name: prenom
+                  type: VARCHAR(100)
+
+              - column:
+                  name: telephone
+                  type: VARCHAR(20)
+
+              - column:
+                  name: adresse
+                  type: VARCHAR(255)
+
+              - column:
+                  name: numero_piece_identite
+                  type: VARCHAR(100)  # Pour un CNI, passeport, etc.
+
+              - column:
+                  name: photo
+                  type: LONGBLOB      # Autorise tout type/poids de photo
+
+              - column:
+                  name: latitude_actuelle
+                  type: DOUBLE
+
+              - column:
+                  name: longitude_actuelle
+                  type: DOUBLE
+
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
