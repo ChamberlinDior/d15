@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/colis").permitAll()
 
                         // Protéger les autres endpoints colis (GET, PUT, DELETE, etc.)
-                        .requestMatchers("/api/colis/**").authenticated()
+                        .requestMatchers("/api/colis/**").permitAll()
 
                         // Toutes les autres requêtes nécessitent une authentification
                         .anyRequest().authenticated()
