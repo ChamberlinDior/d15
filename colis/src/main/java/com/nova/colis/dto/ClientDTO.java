@@ -14,12 +14,19 @@ public class ClientDTO {
     private Double longitude;
     private String role;
 
+    /**
+     * **Photo du client** (en binaire).
+     */
+    private byte[] photo; // Nouveau champ
+
     // Constructeurs
 
     public ClientDTO() {
     }
 
-    public ClientDTO(Long id, String email, String nom, String prenom, String telephone, String adresse, Double latitude, Double longitude, String role) {
+    public ClientDTO(Long id, String email, String nom, String prenom,
+                     String telephone, String adresse,
+                     Double latitude, Double longitude, String role) {
         this.id = id;
         this.email = email;
         this.nom = nom;
@@ -36,7 +43,6 @@ public class ClientDTO {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -44,7 +50,6 @@ public class ClientDTO {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -52,7 +57,6 @@ public class ClientDTO {
     public String getNom() {
         return nom;
     }
-
     public void setNom(String nom) {
         this.nom = nom;
     }
@@ -60,7 +64,6 @@ public class ClientDTO {
     public String getPrenom() {
         return prenom;
     }
-
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
@@ -68,7 +71,6 @@ public class ClientDTO {
     public String getTelephone() {
         return telephone;
     }
-
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
@@ -76,7 +78,6 @@ public class ClientDTO {
     public String getAdresse() {
         return adresse;
     }
-
     public void setAdresse(String adresse) {
         this.adresse = adresse;
     }
@@ -84,7 +85,6 @@ public class ClientDTO {
     public Double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
@@ -92,7 +92,6 @@ public class ClientDTO {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
@@ -100,8 +99,17 @@ public class ClientDTO {
     public String getRole() {
         return role;
     }
-
     public void setRole(String role) {
         this.role = role;
+    }
+
+    /**
+     * **Getter/Setter pour la photo**.
+     */
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 }

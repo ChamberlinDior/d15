@@ -4,7 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO pour représenter les données reçues lors des requêtes d'inscription ou de mise à jour d'un Client.
+ * DTO pour représenter les données reçues lors des requêtes
+ * d'inscription ou de mise à jour d'un Client.
  */
 public class ClientRequestDTO {
 
@@ -15,22 +16,27 @@ public class ClientRequestDTO {
     private String password;
 
     private String nom;
-
     private String prenom;
-
     private String telephone;
-
     private String adresse;
 
     private Double latitude;
     private Double longitude;
+
+    /**
+     * **Champ pour la photo** du client (en binaire).
+     * On accepte tout type/taille (LONGBLOB) côté DB.
+     */
+    private byte[] photo;  // Nouveau champ
 
     // Constructeurs
 
     public ClientRequestDTO() {
     }
 
-    public ClientRequestDTO(String email, String password, String nom, String prenom, String telephone, String adresse, Double latitude, Double longitude) {
+    public ClientRequestDTO(String email, String password, String nom, String prenom,
+                            String telephone, String adresse,
+                            Double latitude, Double longitude) {
         this.email = email;
         this.password = password;
         this.nom = nom;
@@ -46,7 +52,6 @@ public class ClientRequestDTO {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -54,7 +59,6 @@ public class ClientRequestDTO {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -62,7 +66,6 @@ public class ClientRequestDTO {
     public String getNom() {
         return nom;
     }
-
     public void setNom(String nom) {
         this.nom = nom;
     }
@@ -70,7 +73,6 @@ public class ClientRequestDTO {
     public String getPrenom() {
         return prenom;
     }
-
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
@@ -78,7 +80,6 @@ public class ClientRequestDTO {
     public String getTelephone() {
         return telephone;
     }
-
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
@@ -86,7 +87,6 @@ public class ClientRequestDTO {
     public String getAdresse() {
         return adresse;
     }
-
     public void setAdresse(String adresse) {
         this.adresse = adresse;
     }
@@ -94,7 +94,6 @@ public class ClientRequestDTO {
     public Double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
@@ -102,8 +101,17 @@ public class ClientRequestDTO {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    /**
+     * **Getter/Setter pour la photo**.
+     */
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 }

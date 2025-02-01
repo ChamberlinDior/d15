@@ -1,4 +1,5 @@
 databaseChangeLog:
+  # CHANGESET N°1 : Création de la table 'clients'
   - changeSet:
       id: 1
       author: chamberlin
@@ -45,6 +46,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+  # CHANGESET N°2 : Création de la table 'colis'
   - changeSet:
       id: 2
       author: chamberlin
@@ -84,11 +86,13 @@ databaseChangeLog:
               - column:
                   name: assurance
                   type: TINYINT(1)
+
               - column:
                   name: client_id
                   type: BIGINT
                   constraints:
                     nullable: false
+
               - column:
                   name: nom_expediteur
                   type: VARCHAR(100)
@@ -104,6 +108,7 @@ databaseChangeLog:
               - column:
                   name: ville_depart
                   type: VARCHAR(100)
+
               - column:
                   name: nom_destinataire
                   type: VARCHAR(100)
@@ -119,6 +124,7 @@ databaseChangeLog:
               - column:
                   name: ville_destination
                   type: VARCHAR(100)
+
               - column:
                   name: livreur_id
                   type: BIGINT
@@ -128,11 +134,13 @@ databaseChangeLog:
               - column:
                   name: telephone_livreur
                   type: VARCHAR(20)
+
               - column:
                   name: statut_colis
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+
               - column:
                   name: date_creation
                   type: DATETIME
@@ -146,6 +154,7 @@ databaseChangeLog:
               - column:
                   name: date_livraison_effective
                   type: DATETIME
+
               - column:
                   name: prix_total
                   type: DOUBLE
@@ -155,12 +164,14 @@ databaseChangeLog:
               - column:
                   name: commission_plateforme
                   type: DOUBLE
+
               - column:
                   name: mode_paiement
                   type: VARCHAR(50)
               - column:
                   name: statut_paiement
                   type: VARCHAR(50)
+
               - column:
                   name: historique_suivi
                   type: TEXT
@@ -170,6 +181,8 @@ databaseChangeLog:
               - column:
                   name: preuve_livraison
                   type: TEXT
+
+        # Clé étrangère vers 'clients'
         - addForeignKeyConstraint:
             baseTableName: colis
             baseColumnNames: client_id
@@ -177,6 +190,7 @@ databaseChangeLog:
             referencedTableName: clients
             referencedColumnNames: id
 
+  # CHANGESET N°3 : Convertir la colonne 'assurance' en BIT
   - changeSet:
       id: 3
       author: chamberlin
@@ -186,7 +200,7 @@ databaseChangeLog:
             columnName: assurance
             newDataType: BIT
 
-  # NOUVEAU CHANGESET POUR LES LIVREURS
+  # CHANGESET N°4 : Création de la table 'livreurs'
   - changeSet:
       id: 4
       author: "admin"
@@ -201,52 +215,55 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-
               - column:
                   name: email
                   type: VARCHAR(255)
                   constraints:
                     unique: true
                     nullable: false
-
               - column:
                   name: password
                   type: VARCHAR(255)
-
               - column:
                   name: nom
                   type: VARCHAR(100)
-
               - column:
                   name: prenom
                   type: VARCHAR(100)
-
               - column:
                   name: telephone
                   type: VARCHAR(20)
-
               - column:
                   name: adresse
                   type: VARCHAR(255)
-
               - column:
                   name: numero_piece_identite
-                  type: VARCHAR(100)  # Pour un CNI, passeport, etc.
-
+                  type: VARCHAR(100)
               - column:
                   name: photo
-                  type: LONGBLOB      # Autorise tout type/poids de photo
-
+                  type: LONGBLOB
               - column:
                   name: latitude_actuelle
                   type: DOUBLE
-
               - column:
                   name: longitude_actuelle
                   type: DOUBLE
-
               - column:
                   name: role
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+
+  # CHANGESET N°5 : Ajout de la colonne 'photo' dans la table 'clients'
+  - changeSet:
+      id: 5
+      author: "admin"
+      changes:
+        - addColumn:
+            tableName: clients
+            columns:
+              - column:
+                  name: photo
+                  type: LONGBLOB
+                  constraints:
+                    nullable: true

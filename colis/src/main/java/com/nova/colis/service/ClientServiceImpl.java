@@ -47,6 +47,11 @@ public class ClientServiceImpl implements ClientService {
         client.setLongitude(clientRequestDTO.getLongitude());
         client.setRole("ROLE_CLIENT"); // Rôle par défaut
 
+        // **Gestion de la photo : on stocke directement le tableau de bytes**
+        if (clientRequestDTO.getPhoto() != null && clientRequestDTO.getPhoto().length > 0) {
+            client.setPhoto(clientRequestDTO.getPhoto());
+        }
+
         Client savedClient = clientRepository.save(client);
         return mapToDTO(savedClient);
     }
@@ -132,10 +137,10 @@ public class ClientServiceImpl implements ClientService {
             client.setLongitude(clientRequestDTO.getLongitude());
         }
 
-        // Optionnel : mise à jour du rôle si nécessaire
-        // if (clientRequestDTO.getRole() != null && !clientRequestDTO.getRole().isEmpty()) {
-        //     client.setRole(clientRequestDTO.getRole());
-        // }
+        // **Mise à jour de la photo si fournie**
+        if (clientRequestDTO.getPhoto() != null && clientRequestDTO.getPhoto().length > 0) {
+            client.setPhoto(clientRequestDTO.getPhoto());
+        }
 
         Client updatedClient = clientRepository.save(client);
         return mapToDTO(updatedClient);
@@ -165,6 +170,10 @@ public class ClientServiceImpl implements ClientService {
         dto.setLatitude(client.getLatitude());
         dto.setLongitude(client.getLongitude());
         dto.setRole(client.getRole());
+
+        // **On copie également la photo** vers le DTO
+        dto.setPhoto(client.getPhoto());
+
         return dto;
     }
 }

@@ -32,12 +32,20 @@ public class Client {
 
     private String role; // Exemple: ROLE_CLIENT, ROLE_ADMIN, ROLE_LIVREUR
 
-    // Constructeurs
+    /**
+     * **Photo** en binaire (LONGBLOB) acceptant tout format/taille.
+     */
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] photo;  // Nouveau champ
+
+    // --- Constructeurs
 
     public Client() {
     }
 
-    public Client(Long id, String email, String password, String nom, String prenom, String telephone, String adresse, Double latitude, Double longitude, String role) {
+    public Client(Long id, String email, String password, String nom, String prenom, String telephone,
+                  String adresse, Double latitude, Double longitude, String role) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -55,7 +63,6 @@ public class Client {
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -63,7 +70,6 @@ public class Client {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -71,7 +77,6 @@ public class Client {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -79,7 +84,6 @@ public class Client {
     public String getNom() {
         return nom;
     }
-
     public void setNom(String nom) {
         this.nom = nom;
     }
@@ -87,7 +91,6 @@ public class Client {
     public String getPrenom() {
         return prenom;
     }
-
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
@@ -95,7 +98,6 @@ public class Client {
     public String getTelephone() {
         return telephone;
     }
-
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
@@ -103,7 +105,6 @@ public class Client {
     public String getAdresse() {
         return adresse;
     }
-
     public void setAdresse(String adresse) {
         this.adresse = adresse;
     }
@@ -111,7 +112,6 @@ public class Client {
     public Double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
@@ -119,7 +119,6 @@ public class Client {
     public Double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
@@ -127,9 +126,18 @@ public class Client {
     public String getRole() {
         return role;
     }
-
     public void setRole(String role) {
         this.role = role;
+    }
+
+    /**
+     * **Getter/Setter de la photo**.
+     */
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 
     // equals et hashCode

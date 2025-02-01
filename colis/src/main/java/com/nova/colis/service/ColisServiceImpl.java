@@ -23,12 +23,16 @@ public class ColisServiceImpl implements ColisService {
     public ColisDTO createColis(ColisRequestDTO dto) {
         // 1. Convertir DTO -> Entité
         Colis colis = mapToEntity(dto);
-        // 2. Générer une référence unique (exemple "COL-XXXXXX")
+
+        // 2. Générer une référence unique ex: "COL-XXXXXX"
         colis.setReferenceColis("COL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+
         // 3. Calcul du tarif
         calculTarif(colis);
-        // 4. Sauvegarde BDD
+
+        // 4. Sauvegarde
         Colis saved = colisRepository.save(colis);
+
         // 5. Retourner le DTO
         return mapToDTO(saved);
     }
@@ -52,10 +56,10 @@ public class ColisServiceImpl implements ColisService {
         Colis colis = colisRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Colis", "id", id));
 
-        // Mettre à jour les champs selon dto
+        // Mettre à jour
         updateEntityFromDTO(colis, dto);
 
-        // Recalculer le tarif au besoin
+        // Recalculer tarif
         calculTarif(colis);
 
         Colis updated = colisRepository.save(colis);
@@ -77,12 +81,9 @@ public class ColisServiceImpl implements ColisService {
         StatutColis statutEnum = StatutColis.valueOf(nouveauStatut);
         colis.setStatutColis(statutEnum);
 
-        // Exemple : si EN_COURS_DE_LIVRAISON => on définit la datePriseEnCharge
-        if(statutEnum == StatutColis.EN_COURS_DE_LIVRAISON){
+        if (statutEnum == StatutColis.EN_COURS_DE_LIVRAISON) {
             colis.setDatePriseEnCharge(LocalDateTime.now());
-        }
-        // si LIVRE => dateLivraisonEffective
-        if(statutEnum == StatutColis.LIVRE){
+        } else if (statutEnum == StatutColis.LIVRE) {
             colis.setDateLivraisonEffective(LocalDateTime.now());
         }
 
@@ -95,11 +96,10 @@ public class ColisServiceImpl implements ColisService {
         Colis colis = colisRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Colis", "id", id));
 
-        // Mettre à jour mode & statut de paiement (si fournis)
-        if(dtoPaiement.getModePaiement() != null){
+        if (dtoPaiement.getModePaiement() != null) {
             colis.setModePaiement(dtoPaiement.getModePaiement());
         }
-        if(dtoPaiement.getStatutPaiement() != null){
+        if (dtoPaiement.getStatutPaiement() != null) {
             colis.setStatutPaiement(dtoPaiement.getStatutPaiement());
         }
 
@@ -108,59 +108,43 @@ public class ColisServiceImpl implements ColisService {
     }
 
     /**
-     * Méthode de calcul du tarif en fonction du type de colis et du poids.
-     *
-     * Personnalisez selon votre grille (urbain, interurbain, international...).
+     * Calcul du tarif en fonction du type de colis et du poids.
      */
     private void calculTarif(Colis colis) {
-        if(colis.getPoids() == null) {
+        if (colis.getPoids() == null) {
             colis.setPoids(0.0);
         }
         double poids = colis.getPoids();
         double basePrice = 0.0;
 
-        // EXEMPLE simplifié
         switch (colis.getTypeColis()) {
             case STANDARD:
-                // Colis standard
-                if (poids <= 5) {
-                    basePrice = 3000;
-                } else if (poids <= 10) {
-                    basePrice = 4500;
-                } else if (poids <= 20) {
-                    basePrice = 7500;
-                } else {
-                    basePrice = 11000;
-                }
+                if (poids <= 5) basePrice = 3000;
+                else if (poids <= 10) basePrice = 4500;
+                else if (poids <= 20) basePrice = 7500;
+                else basePrice = 11000;
                 break;
 
             case OBJET_DE_VALEUR:
-                // Colis de valeur (assurance incluse)
-                if (poids <= 5) {
-                    basePrice = 4000;
-                } else if (poids <= 10) {
-                    basePrice = 6000;
-                } else if (poids <= 20) {
-                    basePrice = 9500;
-                } else {
-                    basePrice = 14000;
-                }
+                if (poids <= 5) basePrice = 4000;
+                else if (poids <= 10) basePrice = 6000;
+                else if (poids <= 20) basePrice = 9500;
+                else basePrice = 14000;
                 break;
 
             case VOLUMINEUX:
-                // Colis volumineux ( >30kg en principe)
-                if (poids <= 50) {
-                    basePrice = 15000;
-                } else if (poids <= 100) {
-                    basePrice = 25000;
-                } else {
-                    // tarif personnalisé
-                    basePrice = 40000;
-                }
+                if (poids <= 50) basePrice = 15000;
+                else if (poids <= 100) basePrice = 25000;
+                else basePrice = 40000;
                 break;
         }
 
-        // Part livreur / plateforme (ex: 75% -> livreur, 25% -> plateforme)
+        // +5% si assurance = true
+        if (Boolean.TRUE.equals(colis.getAssurance())) {
+            basePrice *= 1.05;
+        }
+
+        // ex: 75% -> livreur, 25% -> plateforme
         double livreurShare = basePrice * 0.75;
         double plateformeShare = basePrice * 0.25;
 
@@ -170,7 +154,7 @@ public class ColisServiceImpl implements ColisService {
     }
 
     /**
-     * Convertit un ColisRequestDTO en entité Colis (pour create)
+     * Convertit un ColisRequestDTO -> entité Colis
      */
     private Colis mapToEntity(ColisRequestDTO dto) {
         Colis c = new Colis();
@@ -179,10 +163,10 @@ public class ColisServiceImpl implements ColisService {
     }
 
     /**
-     * Met à jour une entité Colis existante à partir d'un DTO
+     * Met à jour une entité existante à partir du DTO
      */
     private void updateEntityFromDTO(Colis c, ColisRequestDTO dto) {
-        if(dto.getTypeColis() != null) c.setTypeColis(dto.getTypeColis());
+        if (dto.getTypeColis() != null) c.setTypeColis(dto.getTypeColis());
         c.setDescription(dto.getDescription());
         c.setPoids(dto.getPoids());
         c.setDimensions(dto.getDimensions());
@@ -190,7 +174,7 @@ public class ColisServiceImpl implements ColisService {
         c.setAssurance(dto.getAssurance());
 
         // Expéditeur
-        if(dto.getClientId() != null) c.setClientId(dto.getClientId());
+        if (dto.getClientId() != null) c.setClientId(dto.getClientId());
         c.setNomExpediteur(dto.getNomExpediteur());
         c.setTelephoneExpediteur(dto.getTelephoneExpediteur());
         c.setEmailExpediteur(dto.getEmailExpediteur());
@@ -209,25 +193,25 @@ public class ColisServiceImpl implements ColisService {
         c.setNomLivreur(dto.getNomLivreur());
         c.setTelephoneLivreur(dto.getTelephoneLivreur());
 
-        // Statut colis
-        if(dto.getStatutColis() != null){
+        // Statut
+        if (dto.getStatutColis() != null) {
             c.setStatutColis(dto.getStatutColis());
         }
-        if(dto.getDatePriseEnCharge() != null){
+        if (dto.getDatePriseEnCharge() != null) {
             c.setDatePriseEnCharge(dto.getDatePriseEnCharge());
         }
-        if(dto.getDateLivraisonEstimee() != null){
+        if (dto.getDateLivraisonEstimee() != null) {
             c.setDateLivraisonEstimee(dto.getDateLivraisonEstimee());
         }
-        if(dto.getDateLivraisonEffective() != null){
+        if (dto.getDateLivraisonEffective() != null) {
             c.setDateLivraisonEffective(dto.getDateLivraisonEffective());
         }
 
         // Paiement
-        if(dto.getModePaiement() != null){
+        if (dto.getModePaiement() != null) {
             c.setModePaiement(dto.getModePaiement());
         }
-        if(dto.getStatutPaiement() != null){
+        if (dto.getStatutPaiement() != null) {
             c.setStatutPaiement(dto.getStatutPaiement());
         }
 
@@ -238,7 +222,7 @@ public class ColisServiceImpl implements ColisService {
     }
 
     /**
-     * Convertit une entité Colis en ColisDTO (pour renvoyer au front)
+     * Convertit l'entité Colis -> DTO
      */
     private ColisDTO mapToDTO(Colis c) {
         ColisDTO dto = new ColisDTO();
