@@ -25,21 +25,25 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Clients
+                        // Endpoints pour l'inscription et la connexion des clients
                         .requestMatchers("/api/clients/register").permitAll()
                         .requestMatchers("/api/clients/login").permitAll()
 
-                        // Livreurs
+                        // Endpoints pour l'inscription et la connexion des livreurs
                         .requestMatchers("/api/livreurs/register").permitAll()
                         .requestMatchers("/api/livreurs/login").permitAll()
 
                         // Autoriser la création de colis sans authentification
                         .requestMatchers(HttpMethod.POST, "/api/colis").permitAll()
 
-                        // Protéger les autres endpoints colis (GET, PUT, DELETE, etc.)
+                        // Autoriser l'accès aux endpoints du chat (ouvert à tous)
+                        // Le pattern correspond à /api/colis/{colisId}/chat/**
+                        .requestMatchers("/api/colis/*/chat/**").permitAll()
+
+                        // Les autres endpoints colis restent accessibles publiquement
                         .requestMatchers("/api/colis/**").permitAll()
 
-                        // Toutes les autres requêtes nécessitent une authentification
+                        // Toute autre requête nécessite une authentification
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

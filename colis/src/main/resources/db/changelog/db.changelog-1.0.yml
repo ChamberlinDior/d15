@@ -172,8 +172,6 @@ databaseChangeLog:
               - column:
                   name: preuve_livraison
                   type: TEXT
-
-        # Clé étrangère vers 'clients'
         - addForeignKeyConstraint:
             baseTableName: colis
             baseColumnNames: client_id
@@ -270,3 +268,54 @@ databaseChangeLog:
               - column:
                   name: paiement_info
                   type: TEXT
+
+  # CHANGESET N°7 : Création de la table 'chat_messages' pour le module de chat
+  - changeSet:
+      id: 7
+      author: chamberlin
+      changes:
+        - createTable:
+            tableName: chat_messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: colis_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                  remarks: "Référence du colis associé"
+              - column:
+                  name: sender_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                  remarks: "ID de l'expéditeur (client ou livreur)"
+              - column:
+                  name: sender_role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                  remarks: "ROLE_CLIENT ou ROLE_LIVREUR"
+              - column:
+                  name: message
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: chat_messages
+            baseColumnNames: colis_id
+            constraintName: fk_chat_colis
+            referencedTableName: colis
+            referencedColumnNames: id
