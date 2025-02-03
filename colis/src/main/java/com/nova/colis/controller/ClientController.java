@@ -26,7 +26,7 @@ public class ClientController {
      * Inscription d'un nouveau client.
      * Endpoint : POST /api/clients/register
      *
-     * @param clientRequestDTO Les données du client.
+     * @param clientRequestDTO Les donn&eacute;es du client.
      * @return Le client inscrit.
      */
     @PostMapping("/register")
