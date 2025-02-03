@@ -7,9 +7,6 @@ import com.nova.colis.model.TypeColis;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-/**
- * DTO utilisé pour créer ou modifier un Colis.
- */
 public class ColisRequestDTO {
 
     // Informations générales
@@ -23,7 +20,7 @@ public class ColisRequestDTO {
 
     // Expéditeur
     @NotNull
-    private Long clientId;  // ID du client
+    private Long clientId;
     private String nomExpediteur;
     private String telephoneExpediteur;
     private String emailExpediteur;
@@ -35,6 +32,11 @@ public class ColisRequestDTO {
     private String telephoneDestinataire;
     private String emailDestinataire;
     private String adresseLivraison;
+    /**
+     * Pour ce champ, le frontend envoie désormais :
+     * - le type d'expédition (ex : "Urbain", "Interurbain", "International")
+     * via ce champ (bien que le nom reste "villeDestination")
+     */
     private String villeDestination;
 
     // Livreur (optionnel)
@@ -51,6 +53,10 @@ public class ColisRequestDTO {
     // Paiement
     private ModePaiement modePaiement;
     private StatutPaiement statutPaiement;
+    /**
+     * Nouveau champ pour enregistrer les informations spécifiques au paiement.
+     */
+    private String paiementInfo;
 
     // Suivi
     private String historiqueSuivi;
@@ -61,9 +67,11 @@ public class ColisRequestDTO {
     }
 
     // --- GETTERS / SETTERS ---
+
     public TypeColis getTypeColis() {
         return typeColis;
     }
+
     public void setTypeColis(TypeColis typeColis) {
         this.typeColis = typeColis;
     }
@@ -71,6 +79,7 @@ public class ColisRequestDTO {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -78,6 +87,7 @@ public class ColisRequestDTO {
     public Double getPoids() {
         return poids;
     }
+
     public void setPoids(Double poids) {
         this.poids = poids;
     }
@@ -85,6 +95,7 @@ public class ColisRequestDTO {
     public String getDimensions() {
         return dimensions;
     }
+
     public void setDimensions(String dimensions) {
         this.dimensions = dimensions;
     }
@@ -92,6 +103,7 @@ public class ColisRequestDTO {
     public Double getValeurDeclaree() {
         return valeurDeclaree;
     }
+
     public void setValeurDeclaree(Double valeurDeclaree) {
         this.valeurDeclaree = valeurDeclaree;
     }
@@ -99,6 +111,7 @@ public class ColisRequestDTO {
     public Boolean getAssurance() {
         return assurance;
     }
+
     public void setAssurance(Boolean assurance) {
         this.assurance = assurance;
     }
@@ -106,6 +119,7 @@ public class ColisRequestDTO {
     public Long getClientId() {
         return clientId;
     }
+
     public void setClientId(Long clientId) {
         this.clientId = clientId;
     }
@@ -113,6 +127,7 @@ public class ColisRequestDTO {
     public String getNomExpediteur() {
         return nomExpediteur;
     }
+
     public void setNomExpediteur(String nomExpediteur) {
         this.nomExpediteur = nomExpediteur;
     }
@@ -120,6 +135,7 @@ public class ColisRequestDTO {
     public String getTelephoneExpediteur() {
         return telephoneExpediteur;
     }
+
     public void setTelephoneExpediteur(String telephoneExpediteur) {
         this.telephoneExpediteur = telephoneExpediteur;
     }
@@ -127,6 +143,7 @@ public class ColisRequestDTO {
     public String getEmailExpediteur() {
         return emailExpediteur;
     }
+
     public void setEmailExpediteur(String emailExpediteur) {
         this.emailExpediteur = emailExpediteur;
     }
@@ -134,6 +151,7 @@ public class ColisRequestDTO {
     public String getAdresseEnlevement() {
         return adresseEnlevement;
     }
+
     public void setAdresseEnlevement(String adresseEnlevement) {
         this.adresseEnlevement = adresseEnlevement;
     }
@@ -141,6 +159,7 @@ public class ColisRequestDTO {
     public String getVilleDepart() {
         return villeDepart;
     }
+
     public void setVilleDepart(String villeDepart) {
         this.villeDepart = villeDepart;
     }
@@ -148,6 +167,7 @@ public class ColisRequestDTO {
     public String getNomDestinataire() {
         return nomDestinataire;
     }
+
     public void setNomDestinataire(String nomDestinataire) {
         this.nomDestinataire = nomDestinataire;
     }
@@ -155,6 +175,7 @@ public class ColisRequestDTO {
     public String getTelephoneDestinataire() {
         return telephoneDestinataire;
     }
+
     public void setTelephoneDestinataire(String telephoneDestinataire) {
         this.telephoneDestinataire = telephoneDestinataire;
     }
@@ -162,6 +183,7 @@ public class ColisRequestDTO {
     public String getEmailDestinataire() {
         return emailDestinataire;
     }
+
     public void setEmailDestinataire(String emailDestinataire) {
         this.emailDestinataire = emailDestinataire;
     }
@@ -169,6 +191,7 @@ public class ColisRequestDTO {
     public String getAdresseLivraison() {
         return adresseLivraison;
     }
+
     public void setAdresseLivraison(String adresseLivraison) {
         this.adresseLivraison = adresseLivraison;
     }
@@ -176,6 +199,7 @@ public class ColisRequestDTO {
     public String getVilleDestination() {
         return villeDestination;
     }
+
     public void setVilleDestination(String villeDestination) {
         this.villeDestination = villeDestination;
     }
@@ -183,6 +207,7 @@ public class ColisRequestDTO {
     public Long getLivreurId() {
         return livreurId;
     }
+
     public void setLivreurId(Long livreurId) {
         this.livreurId = livreurId;
     }
@@ -190,6 +215,7 @@ public class ColisRequestDTO {
     public String getNomLivreur() {
         return nomLivreur;
     }
+
     public void setNomLivreur(String nomLivreur) {
         this.nomLivreur = nomLivreur;
     }
@@ -197,6 +223,7 @@ public class ColisRequestDTO {
     public String getTelephoneLivreur() {
         return telephoneLivreur;
     }
+
     public void setTelephoneLivreur(String telephoneLivreur) {
         this.telephoneLivreur = telephoneLivreur;
     }
@@ -204,6 +231,7 @@ public class ColisRequestDTO {
     public StatutColis getStatutColis() {
         return statutColis;
     }
+
     public void setStatutColis(StatutColis statutColis) {
         this.statutColis = statutColis;
     }
@@ -211,6 +239,7 @@ public class ColisRequestDTO {
     public LocalDateTime getDatePriseEnCharge() {
         return datePriseEnCharge;
     }
+
     public void setDatePriseEnCharge(LocalDateTime datePriseEnCharge) {
         this.datePriseEnCharge = datePriseEnCharge;
     }
@@ -218,6 +247,7 @@ public class ColisRequestDTO {
     public LocalDateTime getDateLivraisonEstimee() {
         return dateLivraisonEstimee;
     }
+
     public void setDateLivraisonEstimee(LocalDateTime dateLivraisonEstimee) {
         this.dateLivraisonEstimee = dateLivraisonEstimee;
     }
@@ -225,6 +255,7 @@ public class ColisRequestDTO {
     public LocalDateTime getDateLivraisonEffective() {
         return dateLivraisonEffective;
     }
+
     public void setDateLivraisonEffective(LocalDateTime dateLivraisonEffective) {
         this.dateLivraisonEffective = dateLivraisonEffective;
     }
@@ -232,6 +263,7 @@ public class ColisRequestDTO {
     public ModePaiement getModePaiement() {
         return modePaiement;
     }
+
     public void setModePaiement(ModePaiement modePaiement) {
         this.modePaiement = modePaiement;
     }
@@ -239,13 +271,23 @@ public class ColisRequestDTO {
     public StatutPaiement getStatutPaiement() {
         return statutPaiement;
     }
+
     public void setStatutPaiement(StatutPaiement statutPaiement) {
         this.statutPaiement = statutPaiement;
+    }
+
+    public String getPaiementInfo() {
+        return paiementInfo;
+    }
+
+    public void setPaiementInfo(String paiementInfo) {
+        this.paiementInfo = paiementInfo;
     }
 
     public String getHistoriqueSuivi() {
         return historiqueSuivi;
     }
+
     public void setHistoriqueSuivi(String historiqueSuivi) {
         this.historiqueSuivi = historiqueSuivi;
     }
@@ -253,6 +295,7 @@ public class ColisRequestDTO {
     public String getCoordonneesGPS() {
         return coordonneesGPS;
     }
+
     public void setCoordonneesGPS(String coordonneesGPS) {
         this.coordonneesGPS = coordonneesGPS;
     }
@@ -260,6 +303,7 @@ public class ColisRequestDTO {
     public String getPreuveLivraison() {
         return preuveLivraison;
     }
+
     public void setPreuveLivraison(String preuveLivraison) {
         this.preuveLivraison = preuveLivraison;
     }

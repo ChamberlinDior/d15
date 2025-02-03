@@ -21,15 +21,6 @@ public class Colis {
     @Column(unique = true)
     private String referenceColis;
 
-    /**
-     * Optionnel : un numéro unique supplémentaire (ex: "GAB-2025-000123").
-     * Si vous le souhaitez, décommentez ou ajoutez le champ en BDD.
-     */
-    // private String numeroUnique;
-
-    /**
-     * Type de colis (STANDARD, OBJET_DE_VALEUR, VOLUMINEUX, etc.).
-     */
     @Enumerated(EnumType.STRING)
     private TypeColis typeColis;
 
@@ -42,7 +33,7 @@ public class Colis {
     private Boolean assurance;      // true/false
 
     // Informations Expéditeur
-    private Long clientId;          // ID du Client (foreign key)
+    private Long clientId;
     private String nomExpediteur;
     private String telephoneExpediteur;
     private String emailExpediteur;
@@ -54,6 +45,9 @@ public class Colis {
     private String telephoneDestinataire;
     private String emailDestinataire;
     private String adresseLivraison;
+    /**
+     * Ce champ contient le type d'expédition (ex: "Urbain", "Interurbain", "International")
+     */
     private String villeDestination;
 
     // Informations Livreurs
@@ -77,16 +71,23 @@ public class Colis {
     private Double commissionPlateforme;
 
     @Enumerated(EnumType.STRING)
-    private ModePaiement modePaiement;    // ESPECES, MOBILE_MONEY...
+    private ModePaiement modePaiement;    // ESPECES, MOBILE_MONEY, CARTE_BANCAIRE, PAYPAL
     @Enumerated(EnumType.STRING)
-    private StatutPaiement statutPaiement; // PAYE, EN_ATTENTE, etc.
+    private StatutPaiement statutPaiement; // Par exemple : PAYE, EN_ATTENTE, etc.
+
+    /**
+     * Nouveau champ pour enregistrer les informations spécifiques au paiement.
+     * (Par exemple, un JSON contenant les détails de la carte ou l'email PayPal.)
+     */
+    @Lob
+    @Column(name = "paiement_info", columnDefinition = "TEXT")
+    private String paiementInfo;
 
     // Suivi du colis
     @Lob
     @Column(columnDefinition = "TEXT")
     private String historiqueSuivi;      // Historique, logs...
 
-    // Modification : on précise le nom de la colonne tel qu'il est défini en base (coordonnees_gps)
     @Column(name = "coordonnees_gps")
     private String coordonneesGPS;       // dernière position
 
@@ -109,6 +110,7 @@ public class Colis {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -116,22 +118,15 @@ public class Colis {
     public String getReferenceColis() {
         return referenceColis;
     }
+
     public void setReferenceColis(String referenceColis) {
         this.referenceColis = referenceColis;
     }
 
-    /*
-    public String getNumeroUnique() {
-        return numeroUnique;
-    }
-    public void setNumeroUnique(String numeroUnique) {
-        this.numeroUnique = numeroUnique;
-    }
-    */
-
     public TypeColis getTypeColis() {
         return typeColis;
     }
+
     public void setTypeColis(TypeColis typeColis) {
         this.typeColis = typeColis;
     }
@@ -139,6 +134,7 @@ public class Colis {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -146,6 +142,7 @@ public class Colis {
     public Double getPoids() {
         return poids;
     }
+
     public void setPoids(Double poids) {
         this.poids = poids;
     }
@@ -153,6 +150,7 @@ public class Colis {
     public String getDimensions() {
         return dimensions;
     }
+
     public void setDimensions(String dimensions) {
         this.dimensions = dimensions;
     }
@@ -160,6 +158,7 @@ public class Colis {
     public Double getValeurDeclaree() {
         return valeurDeclaree;
     }
+
     public void setValeurDeclaree(Double valeurDeclaree) {
         this.valeurDeclaree = valeurDeclaree;
     }
@@ -167,6 +166,7 @@ public class Colis {
     public Boolean getAssurance() {
         return assurance;
     }
+
     public void setAssurance(Boolean assurance) {
         this.assurance = assurance;
     }
@@ -174,6 +174,7 @@ public class Colis {
     public Long getClientId() {
         return clientId;
     }
+
     public void setClientId(Long clientId) {
         this.clientId = clientId;
     }
@@ -181,6 +182,7 @@ public class Colis {
     public String getNomExpediteur() {
         return nomExpediteur;
     }
+
     public void setNomExpediteur(String nomExpediteur) {
         this.nomExpediteur = nomExpediteur;
     }
@@ -188,6 +190,7 @@ public class Colis {
     public String getTelephoneExpediteur() {
         return telephoneExpediteur;
     }
+
     public void setTelephoneExpediteur(String telephoneExpediteur) {
         this.telephoneExpediteur = telephoneExpediteur;
     }
@@ -195,6 +198,7 @@ public class Colis {
     public String getEmailExpediteur() {
         return emailExpediteur;
     }
+
     public void setEmailExpediteur(String emailExpediteur) {
         this.emailExpediteur = emailExpediteur;
     }
@@ -202,6 +206,7 @@ public class Colis {
     public String getAdresseEnlevement() {
         return adresseEnlevement;
     }
+
     public void setAdresseEnlevement(String adresseEnlevement) {
         this.adresseEnlevement = adresseEnlevement;
     }
@@ -209,6 +214,7 @@ public class Colis {
     public String getVilleDepart() {
         return villeDepart;
     }
+
     public void setVilleDepart(String villeDepart) {
         this.villeDepart = villeDepart;
     }
@@ -216,6 +222,7 @@ public class Colis {
     public String getNomDestinataire() {
         return nomDestinataire;
     }
+
     public void setNomDestinataire(String nomDestinataire) {
         this.nomDestinataire = nomDestinataire;
     }
@@ -223,6 +230,7 @@ public class Colis {
     public String getTelephoneDestinataire() {
         return telephoneDestinataire;
     }
+
     public void setTelephoneDestinataire(String telephoneDestinataire) {
         this.telephoneDestinataire = telephoneDestinataire;
     }
@@ -230,6 +238,7 @@ public class Colis {
     public String getEmailDestinataire() {
         return emailDestinataire;
     }
+
     public void setEmailDestinataire(String emailDestinataire) {
         this.emailDestinataire = emailDestinataire;
     }
@@ -237,6 +246,7 @@ public class Colis {
     public String getAdresseLivraison() {
         return adresseLivraison;
     }
+
     public void setAdresseLivraison(String adresseLivraison) {
         this.adresseLivraison = adresseLivraison;
     }
@@ -244,6 +254,7 @@ public class Colis {
     public String getVilleDestination() {
         return villeDestination;
     }
+
     public void setVilleDestination(String villeDestination) {
         this.villeDestination = villeDestination;
     }
@@ -251,6 +262,7 @@ public class Colis {
     public Long getLivreurId() {
         return livreurId;
     }
+
     public void setLivreurId(Long livreurId) {
         this.livreurId = livreurId;
     }
@@ -258,6 +270,7 @@ public class Colis {
     public String getNomLivreur() {
         return nomLivreur;
     }
+
     public void setNomLivreur(String nomLivreur) {
         this.nomLivreur = nomLivreur;
     }
@@ -265,6 +278,7 @@ public class Colis {
     public String getTelephoneLivreur() {
         return telephoneLivreur;
     }
+
     public void setTelephoneLivreur(String telephoneLivreur) {
         this.telephoneLivreur = telephoneLivreur;
     }
@@ -272,6 +286,7 @@ public class Colis {
     public StatutColis getStatutColis() {
         return statutColis;
     }
+
     public void setStatutColis(StatutColis statutColis) {
         this.statutColis = statutColis;
     }
@@ -279,6 +294,7 @@ public class Colis {
     public LocalDateTime getDateCreation() {
         return dateCreation;
     }
+
     public void setDateCreation(LocalDateTime dateCreation) {
         this.dateCreation = dateCreation;
     }
@@ -286,6 +302,7 @@ public class Colis {
     public LocalDateTime getDatePriseEnCharge() {
         return datePriseEnCharge;
     }
+
     public void setDatePriseEnCharge(LocalDateTime datePriseEnCharge) {
         this.datePriseEnCharge = datePriseEnCharge;
     }
@@ -293,6 +310,7 @@ public class Colis {
     public LocalDateTime getDateLivraisonEstimee() {
         return dateLivraisonEstimee;
     }
+
     public void setDateLivraisonEstimee(LocalDateTime dateLivraisonEstimee) {
         this.dateLivraisonEstimee = dateLivraisonEstimee;
     }
@@ -300,13 +318,17 @@ public class Colis {
     public LocalDateTime getDateLivraisonEffective() {
         return dateLivraisonEffective;
     }
+
     public void setDateLivraisonEffective(LocalDateTime dateLivraisonEffective) {
         this.dateLivraisonEffective = dateLivraisonEffective;
     }
 
+    // Méthodes de tarification
+
     public Double getPrixTotal() {
         return prixTotal;
     }
+
     public void setPrixTotal(Double prixTotal) {
         this.prixTotal = prixTotal;
     }
@@ -314,6 +336,7 @@ public class Colis {
     public Double getFraisLivraison() {
         return fraisLivraison;
     }
+
     public void setFraisLivraison(Double fraisLivraison) {
         this.fraisLivraison = fraisLivraison;
     }
@@ -321,6 +344,7 @@ public class Colis {
     public Double getCommissionPlateforme() {
         return commissionPlateforme;
     }
+
     public void setCommissionPlateforme(Double commissionPlateforme) {
         this.commissionPlateforme = commissionPlateforme;
     }
@@ -328,6 +352,7 @@ public class Colis {
     public ModePaiement getModePaiement() {
         return modePaiement;
     }
+
     public void setModePaiement(ModePaiement modePaiement) {
         this.modePaiement = modePaiement;
     }
@@ -335,13 +360,23 @@ public class Colis {
     public StatutPaiement getStatutPaiement() {
         return statutPaiement;
     }
+
     public void setStatutPaiement(StatutPaiement statutPaiement) {
         this.statutPaiement = statutPaiement;
+    }
+
+    public String getPaiementInfo() {
+        return paiementInfo;
+    }
+
+    public void setPaiementInfo(String paiementInfo) {
+        this.paiementInfo = paiementInfo;
     }
 
     public String getHistoriqueSuivi() {
         return historiqueSuivi;
     }
+
     public void setHistoriqueSuivi(String historiqueSuivi) {
         this.historiqueSuivi = historiqueSuivi;
     }
@@ -349,6 +384,7 @@ public class Colis {
     public String getCoordonneesGPS() {
         return coordonneesGPS;
     }
+
     public void setCoordonneesGPS(String coordonneesGPS) {
         this.coordonneesGPS = coordonneesGPS;
     }
@@ -356,6 +392,7 @@ public class Colis {
     public String getPreuveLivraison() {
         return preuveLivraison;
     }
+
     public void setPreuveLivraison(String preuveLivraison) {
         this.preuveLivraison = preuveLivraison;
     }
