@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql-service:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: transport_db
+    ports:
+      - "3308:3306"  # Le port 3308 de l'hôte pointe vers 3306 dans le conteneur
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  backend-service:
+    build:
+      context: ./colis
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-service:3306/transport_db?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8089:8080"  # Le conteneur écoute sur 8080, accessible sur le port 8089 de l'hôte
+    depends_on:
+      mysql-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
