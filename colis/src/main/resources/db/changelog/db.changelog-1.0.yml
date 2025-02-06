@@ -308,6 +308,10 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: photo
+                  type: LONGBLOB
+                  remarks: "Image jointe au message, optionnelle"
+              - column:
                   name: timestamp
                   type: DATETIME
                   defaultValueComputed: CURRENT_TIMESTAMP

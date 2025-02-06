@@ -4,10 +4,10 @@ import com.nova.colis.dto.ChatMessageRequestDTO;
 import com.nova.colis.dto.ChatMessageResponseDTO;
 import com.nova.colis.model.ChatMessage;
 import com.nova.colis.model.Colis;
-import com.nova.colis.model.StatutColis;
 import com.nova.colis.repository.ChatMessageRepository;
 import com.nova.colis.repository.ColisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +25,10 @@ public class ChatServiceImpl implements ChatService {
 
     @Autowired
     private ColisRepository colisRepository;
+
+    // Injections pour le système de notification via WebSocket
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public ChatMessageResponseDTO sendMessage(ChatMessageRequestDTO requestDTO) {
@@ -50,7 +54,8 @@ public class ChatServiceImpl implements ChatService {
         if ("ROLE_CLIENT".equals(senderRole) && senderId.equals(colis.getClientId())) {
             isAuthorized = true;
         }
-        if ("ROLE_LIVREUR".equals(senderRole) && colis.getLivreurId() != null && senderId.equals(colis.getLivreurId())) {
+        if ("ROLE_LIVREUR".equals(senderRole) &&
+                colis.getLivreurId() != null && senderId.equals(colis.getLivreurId())) {
             isAuthorized = true;
         }
         if (!isAuthorized) {
@@ -64,14 +69,19 @@ public class ChatServiceImpl implements ChatService {
         chatMessage.setSenderRole(senderRole);
         chatMessage.setMessage(requestDTO.getMessage());
         chatMessage.setTimestamp(LocalDateTime.now());
+        chatMessage.setPhoto(requestDTO.getPhoto()); // Peut être null si aucune image n'est envoyée
 
         ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
-        return mapToResponseDTO(savedMessage);
+
+        // Notifier en temps réel via WebSocket
+        ChatMessageResponseDTO responseDTO = mapToResponseDTO(savedMessage);
+        messagingTemplate.convertAndSend("/topic/chat/" + requestDTO.getColisId(), responseDTO);
+
+        return responseDTO;
     }
 
     @Override
     public List<ChatMessageResponseDTO> getConversation(Long colisId) {
-        // On peut vérifier que le colis existe si besoin
         List<ChatMessage> messages = chatMessageRepository.findByColisId(colisId);
         return messages.stream()
                 .map(this::mapToResponseDTO)
@@ -86,6 +96,7 @@ public class ChatServiceImpl implements ChatService {
         dto.setSenderRole(message.getSenderRole());
         dto.setMessage(message.getMessage());
         dto.setTimestamp(message.getTimestamp());
+        dto.setPhoto(message.getPhoto());
         return dto;
     }
 }

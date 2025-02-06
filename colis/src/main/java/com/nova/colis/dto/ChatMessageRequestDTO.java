@@ -10,37 +10,38 @@ public class ChatMessageRequestDTO {
     private String senderRole;
     // Contenu du message
     private String message;
+    // (Optionnel) Image jointe au message (sous forme de tableau de bytes)
+    private byte[] photo;
 
     // Getters et Setters
     public Long getColisId() {
         return colisId;
     }
-
     public void setColisId(Long colisId) {
         this.colisId = colisId;
     }
-
     public Long getSenderId() {
         return senderId;
     }
-
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
     }
-
     public String getSenderRole() {
         return senderRole;
     }
-
     public void setSenderRole(String senderRole) {
         this.senderRole = senderRole;
     }
-
     public String getMessage() {
         return message;
     }
-
     public void setMessage(String message) {
         this.message = message;
+    }
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 }

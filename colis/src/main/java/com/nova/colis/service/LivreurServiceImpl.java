@@ -4,7 +4,10 @@ import com.nova.colis.dto.LivreurDTO;
 import com.nova.colis.dto.LivreurRequestDTO;
 import com.nova.colis.exception.ResourceNotFoundException;
 import com.nova.colis.model.Livreur;
+import com.nova.colis.model.Colis;
+import com.nova.colis.model.StatutColis;
 import com.nova.colis.repository.LivreurRepository;
+import com.nova.colis.repository.ColisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,10 @@ public class LivreurServiceImpl implements LivreurService {
 
     @Autowired
     private LivreurRepository livreurRepository;
+
+    // Injection du repository des colis pour mettre à jour les colis assignés au livreur
+    @Autowired
+    private ColisRepository colisRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -119,6 +126,11 @@ public class LivreurServiceImpl implements LivreurService {
         return mapToDTO(updated);
     }
 
+    /**
+     * Mise à jour de la géolocalisation du livreur.
+     * Après mise à jour, les colis en cours de livraison assignés à ce livreur
+     * voient leur champ coordonneesGPS mis à jour avec la nouvelle position.
+     */
     @Override
     public LivreurDTO updateLocation(Long id, Double latitude, Double longitude) {
         Livreur livreur = livreurRepository.findById(id)
@@ -127,6 +139,15 @@ public class LivreurServiceImpl implements LivreurService {
         livreur.setLongitudeActuelle(longitude);
 
         Livreur updated = livreurRepository.save(livreur);
+
+        // Mettre à jour les colis assignés à ce livreur qui sont en cours de livraison
+        List<Colis> colisEnCours = colisRepository.findByLivreurIdAndStatutColis(id, StatutColis.EN_COURS_DE_LIVRAISON);
+        String nouvellePosition = latitude + "," + longitude;
+        for (Colis colis : colisEnCours) {
+            colis.setCoordonneesGPS(nouvellePosition);
+            colisRepository.save(colis);
+        }
+
         return mapToDTO(updated);
     }
 
