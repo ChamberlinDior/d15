@@ -116,6 +116,20 @@
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
+		<!-- Dépendance Stripe Java pour communiquer avec l'API Stripe -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>20.136.0</version>
+		</dependency>
+
+		<!-- Dépendance Firebase Admin pour l'envoi de notifications push -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.1.1</version>
+		</dependency>
+
 		<!-- Spring Security Test (Optionnel) -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>

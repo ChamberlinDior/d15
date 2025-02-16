@@ -37,8 +37,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/colis").permitAll()
 
                         // Autoriser l'accès aux endpoints du chat (ouvert à tous)
-                        // Le pattern correspond à /api/colis/{colisId}/chat/**
                         .requestMatchers("/api/colis/*/chat/**").permitAll()
+
+                        // Autoriser l'accès aux endpoints des notifications
+                        .requestMatchers("/api/notifications/**").permitAll()
 
                         // Les autres endpoints colis restent accessibles publiquement
                         .requestMatchers("/api/colis/**").permitAll()

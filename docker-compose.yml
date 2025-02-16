@@ -26,7 +26,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     ports:
-      - "8089:8080"  # Le conteneur écoute sur 8080, accessible sur le port 8089 de l'hôte
+      - "8087:8080"  # Le conteneur écoute sur 8080, accessible sur le port 8089 de l'hôte
     depends_on:
       mysql-service:
         condition: service_healthy

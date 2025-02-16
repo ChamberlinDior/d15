@@ -5,7 +5,9 @@ import com.nova.colis.dto.ColisDTO;
 import com.nova.colis.dto.ColisRequestDTO;
 import com.nova.colis.dto.LivreurDTO;
 import com.nova.colis.exception.ResourceNotFoundException;
-import com.nova.colis.model.*;
+import com.nova.colis.model.Colis;
+import com.nova.colis.model.StatutColis;
+import com.nova.colis.model.TypeColis;
 import com.nova.colis.repository.ColisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,21 +25,25 @@ public class ColisServiceImpl implements ColisService {
     @Autowired
     private ColisRepository colisRepository;
 
-    // Injection des services pour obtenir la géolocalisation
+    // Service pour récupérer les informations du client
     @Autowired
     private ClientService clientService;
 
+    // Service pour récupérer les informations du livreur
     @Autowired
     private LivreurService livreurService;
+
+    // Service pour envoyer les notifications push via Firebase
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
 
     @Override
     public ColisDTO createColis(ColisRequestDTO dto) {
         Colis colis = mapToEntity(dto);
         colis.setReferenceColis("COL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        // Lors de la création, le colis est en attente : on initialise sa géolocalisation avec celle du client
+        // Initialisation de la géolocalisation à partir des coordonnées du client
         ClientDTO clientDTO = clientService.getClientById(dto.getClientId());
         if (clientDTO.getLatitude() != null && clientDTO.getLongitude() != null) {
-            // Forcer l'utilisation de Locale.US pour obtenir des décimales avec point
             String coords = String.format(Locale.US, "%.6f,%.6f", clientDTO.getLatitude(), clientDTO.getLongitude());
             colis.setCoordonneesGPS(coords);
         }
@@ -79,8 +85,8 @@ public class ColisServiceImpl implements ColisService {
 
     /**
      * Mise à jour du statut du colis et de sa géolocalisation en fonction du nouveau statut.
-     * Pour les statuts RECUPERE et EN_COURS_DE_LIVRAISON, on met à jour la géolocalisation
-     * en utilisant les coordonnées actuelles du livreur, en s’assurant de respecter le format "lat,lon".
+     * Lorsqu'il passe à RECUPERE (c'est-à-dire que le livreur est arrivé pour récupérer le colis),
+     * une notification push est envoyée au client.
      */
     @Override
     public ColisDTO updateStatutColis(Long id, String nouveauStatut) {
@@ -98,10 +104,11 @@ public class ColisServiceImpl implements ColisService {
             if (!colisActifs.isEmpty()) {
                 throw new IllegalStateException("Ce livreur a déjà un colis en cours de livraison.");
             }
-            // Mise à jour de la géolocalisation via la position actuelle du livreur
+            // Mise à jour de la géolocalisation en fonction de la position actuelle du livreur
             LivreurDTO livreurDTO = livreurService.getLivreurById(colis.getLivreurId());
             if (livreurDTO.getLatitudeActuelle() != null && livreurDTO.getLongitudeActuelle() != null) {
-                String coords = String.format(Locale.US, "%.6f,%.6f", livreurDTO.getLatitudeActuelle(), livreurDTO.getLongitudeActuelle());
+                String coords = String.format(Locale.US, "%.6f,%.6f",
+                        livreurDTO.getLatitudeActuelle(), livreurDTO.getLongitudeActuelle());
                 colis.setCoordonneesGPS(coords);
             }
             colis.setDatePriseEnCharge(LocalDateTime.now());
@@ -109,29 +116,55 @@ public class ColisServiceImpl implements ColisService {
             if (colis.getLivreurId() != null) {
                 LivreurDTO livreurDTO = livreurService.getLivreurById(colis.getLivreurId());
                 if (livreurDTO.getLatitudeActuelle() != null && livreurDTO.getLongitudeActuelle() != null) {
-                    String coords = String.format(Locale.US, "%.6f,%.6f", livreurDTO.getLatitudeActuelle(), livreurDTO.getLongitudeActuelle());
+                    String coords = String.format(Locale.US, "%.6f,%.6f",
+                            livreurDTO.getLatitudeActuelle(), livreurDTO.getLongitudeActuelle());
                     colis.setCoordonneesGPS(coords);
                 }
             }
             colis.setDatePriseEnCharge(LocalDateTime.now());
         } else if (statutEnum == StatutColis.LIVRE) {
-            // Une fois le colis livré, on enregistre la date de livraison effective sans modifier les coordonnées GPS initiales
             colis.setDateLivraisonEffective(LocalDateTime.now());
         } else if (statutEnum == StatutColis.EN_ATTENTE) {
-            // Pour un colis en attente, on initialise les coordonnées GPS uniquement s'il n'est pas déjà renseigné.
             if (colis.getCoordonneesGPS() == null) {
                 ClientDTO clientDTO = clientService.getClientById(colis.getClientId());
                 if (clientDTO.getLatitude() != null && clientDTO.getLongitude() != null) {
-                    String coords = String.format(Locale.US, "%.6f,%.6f", clientDTO.getLatitude(), clientDTO.getLongitude());
+                    String coords = String.format(Locale.US, "%.6f,%.6f",
+                            clientDTO.getLatitude(), clientDTO.getLongitude());
                     colis.setCoordonneesGPS(coords);
                 }
             }
         }
 
-        // Le statut est mis à jour quel que soit le cas
+        // Mise à jour du statut
         colis.setStatutColis(statutEnum);
         Colis saved = colisRepository.save(colis);
-        return mapToDTO(saved);
+        ColisDTO dto = mapToDTO(saved);
+
+        // Envoi de la notification push au client
+        ClientDTO clientDTO = clientService.getClientById(saved.getClientId());
+        if (clientDTO != null && clientDTO.getFcmToken() != null) {
+            String title = "Mise à jour de votre commande";
+            String message;
+            switch (saved.getStatutColis()) {
+                case RECUPERE:
+                    message = "Le livreur est en cours route afin de récupérer votre colis " + saved.getReferenceColis() + ".";
+                    break;
+                case EN_COURS_DE_LIVRAISON:
+                    message = "Votre colis " + saved.getReferenceColis() + " est en cours de livraison.";
+                    break;
+                case LIVRE:
+                    message = "Votre colis " + saved.getReferenceColis() + " a été livré.";
+                    break;
+                case EN_ATTENTE:
+                    message = "Votre colis " + saved.getReferenceColis() + " est en attente.";
+                    break;
+                default:
+                    message = "Le statut de votre colis " + saved.getReferenceColis() + " a changé.";
+            }
+            firebaseMessagingService.sendNotification(title, message, clientDTO.getFcmToken());
+        }
+
+        return dto;
     }
 
     @Override
@@ -151,16 +184,12 @@ public class ColisServiceImpl implements ColisService {
         return mapToDTO(saved);
     }
 
-    /**
-     * Calcul du tarif en fonction du type de colis, du type d’expédition et du poids.
-     */
     private void calculTarif(Colis colis) {
         if (colis.getPoids() == null) {
             colis.setPoids(0.0);
         }
         double poids = colis.getPoids();
         double basePrice = 0.0;
-        // Le frontend envoie le type d'expédition dans le champ "villeDestination"
         String expeditionType = colis.getVilleDestination();
         switch (colis.getTypeColis()) {
             case STANDARD:
@@ -223,7 +252,6 @@ public class ColisServiceImpl implements ColisService {
         }
         double livreurShare = basePrice * 0.75;
         double plateformeShare = basePrice * 0.25;
-        // Mise à jour des champs de tarification
         colis.setPrixTotal(basePrice);
         colis.setFraisLivraison(livreurShare);
         colis.setCommissionPlateforme(plateformeShare);
@@ -235,13 +263,7 @@ public class ColisServiceImpl implements ColisService {
         return c;
     }
 
-    /**
-     * Mise à jour des champs du colis à partir du DTO.
-     * Les champs d'adresse (enlevement, livraison et type d'expédition)
-     * sont mis à jour uniquement lors de la création ou si le colis est encore en EN_ATTENTE.
-     */
     private void updateEntityFromDTO(Colis c, ColisRequestDTO dto) {
-        // Champs généraux
         if (dto.getTypeColis() != null) {
             c.setTypeColis(dto.getTypeColis());
         }
@@ -250,16 +272,12 @@ public class ColisServiceImpl implements ColisService {
         c.setDimensions(dto.getDimensions());
         c.setValeurDeclaree(dto.getValeurDeclaree());
         c.setAssurance(dto.getAssurance());
-
-        // Expéditeur
         if (dto.getClientId() != null) {
             c.setClientId(dto.getClientId());
         }
         c.setNomExpediteur(dto.getNomExpediteur());
         c.setTelephoneExpediteur(dto.getTelephoneExpediteur());
         c.setEmailExpediteur(dto.getEmailExpediteur());
-
-        // MàJ des adresses uniquement si le colis est en attente ou si elles ne sont pas encore renseignées
         if (c.getStatutColis() == null || c.getStatutColis() == StatutColis.EN_ATTENTE) {
             if (dto.getAdresseEnlevement() != null) {
                 c.setAdresseEnlevement(dto.getAdresseEnlevement());
@@ -271,18 +289,12 @@ public class ColisServiceImpl implements ColisService {
                 c.setVilleDestination(dto.getVilleDestination());
             }
         }
-
-        // Destinataire
         c.setNomDestinataire(dto.getNomDestinataire());
         c.setTelephoneDestinataire(dto.getTelephoneDestinataire());
         c.setEmailDestinataire(dto.getEmailDestinataire());
-
-        // Livreur
         c.setLivreurId(dto.getLivreurId());
         c.setNomLivreur(dto.getNomLivreur());
         c.setTelephoneLivreur(dto.getTelephoneLivreur());
-
-        // Statut et dates
         if (dto.getStatutColis() != null) {
             c.setStatutColis(dto.getStatutColis());
         }
@@ -295,8 +307,6 @@ public class ColisServiceImpl implements ColisService {
         if (dto.getDateLivraisonEffective() != null) {
             c.setDateLivraisonEffective(dto.getDateLivraisonEffective());
         }
-
-        // Paiement
         if (dto.getModePaiement() != null) {
             c.setModePaiement(dto.getModePaiement());
         }
@@ -306,10 +316,7 @@ public class ColisServiceImpl implements ColisService {
         if (dto.getPaiementInfo() != null) {
             c.setPaiementInfo(dto.getPaiementInfo());
         }
-
-        // Suivi
         c.setHistoriqueSuivi(dto.getHistoriqueSuivi());
-        // On conserve les coordonnées GPS déjà enregistrées (sinon on enregistre celles passées dans le DTO uniquement si null)
         if (c.getCoordonneesGPS() == null && dto.getCoordonneesGPS() != null) {
             c.setCoordonneesGPS(dto.getCoordonneesGPS());
         }
