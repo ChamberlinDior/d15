@@ -14,18 +14,16 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                    .allowedOrigins(
-                        "http://localhost:8080",        // Pour les tests locaux (navigateur, iOS Sim)
-                        "http://192.168.1.37:8080",       // Pour une IP locale
-                        "exp://127.0.0.1:19000",          // Pour Expo Go en développement
-                        "http://18.191.121.186:8089",
-                            "http://18.191.121.186:8089" // Votre URL publique AWS (ou autre URL de production)
-                        // Vous pouvez ajouter d'autres origines si nécessaire
-                    )
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedHeaders("*");
+                        .allowedOrigins(
+                                "http://localhost:8080",        // Pour tests locaux
+                                "http://192.168.1.37:8080",       // Pour une IP locale
+                                "exp://127.0.0.1:19000",          // Pour Expo Go
+                                "http://18.223.237.15:8089",      // URL de production via IP
+                                "http://ec2-18-223-237-15.us-east-2.compute.amazonaws.com:8089"  // URL de production via DNS
+                        )
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
             }
         };
     }
 }
-
